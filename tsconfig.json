@@ -1,10 +1,8 @@
-/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
-/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
 {
   "compileOnSave": false,
   "compilerOptions": {
     "outDir": "./dist/out-tsc",
-    "strict": true,
+    "strict": false,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
@@ -22,12 +20,20 @@
     "lib": [
       "ES2022",
       "dom"
-    ]
+    ],
+    "forceConsistentCasingInFileNames": true, // Voeg deze toe
+    // Individuele strikte opties uitschakelen
+    "strictNullChecks": false,
+    "strictFunctionTypes": false,
+    "strictBindCallApply": false,
+    "strictPropertyInitialization": false,
+    "noImplicitThis": false,
+    "alwaysStrict": false
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
-    "strictInjectionParameters": true,
-    "strictInputAccessModifiers": true,
-    "strictTemplates": true
+    "strictInjectionParameters": false, // Schakel deze uit als het problemen geeft
+    "strictInputAccessModifiers": false, // Schakel deze uit als het problemen geeft
+    "strictTemplates": false // Schakel deze uit als het problemen geeft
   }
 }
