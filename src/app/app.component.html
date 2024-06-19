@@ -8,7 +8,7 @@
           </div>
           <div class="col-sm-6">
             <button (click)="printReport()" type="button" class="btn btn-primary">Print Report</button>
-            <a href="#addEmployeeModal" class="btn btn-success" data-toggle="modal">
+            <a href="#addServerModal" class="btn btn-success" data-toggle="modal">
               <i class="material-icons" title="Add New Server">&#xE147;</i>
               <span>New Server</span>
             </a>
@@ -58,12 +58,14 @@
                 </td>
                 <td>
                   <a (click)="pingServer(server.ipAddress)" style="cursor: pointer;">
-                    <i *ngIf="(filterStatus$ | async) === '' || (filterStatus$ | async) !== server.ipAddress" class="material-icons" title="Ping server">&#xe328;</i>
-                    <i *ngIf="(filterStatus$ | async) === server.ipAddress" class="fa fa-spinner fa-spin"></i>
+                    <i *ngIf="(filterStatus$ | async) === '' || (filterStatus$ | async) !== server.ipAddress"
+                      class="material-icons" title="Ping server">&#xe328;</i>
+                    <i *ngIf="(filterStatus$ | async) === server.ipAddress"
+                      class="fa fa-spinner fa-spin"></i>
                   </a>
                 </td>
                 <td>
-                  <a (click)="deleteServer(server)" class="delete" style="cursor: pointer;">
+                  <a (click)="deleteServer(server)" class="delete" data-toggle="modal" style="cursor: pointer;">
                     <i class="material-icons" title="Delete">&#xE872;</i>
                   </a>
                 </td>
@@ -72,7 +74,7 @@
           </table>
         </ng-container>
         <ng-container *ngSwitchCase="DataState.ERROR_STATE">
-          <div class="alert-danger">
+          <div class="alert alert-danger">
             {{ appState.error }}
           </div>
         </ng-container>
@@ -82,7 +84,7 @@
 </div>
 
 <!-- Add server Modal HTML -->
-<div id="addEmployeeModal" class="modal fade">
+<div id="addServerModal" class="modal fade">
   <div class="modal-dialog">
     <div class="modal-content">
       <form #serverForm="ngForm" (ngSubmit)="saveServer(serverForm)">

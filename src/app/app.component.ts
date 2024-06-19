@@ -5,15 +5,19 @@ import { AsyncPipe, JsonPipe } from '@angular/common';  // Import AsyncPipe and 
 import { HttpClientModule } from '@angular/common/http';  // Import HttpClientModule
 import { FormsModule } from '@angular/forms';  // Import FormsModule
 import { ServerService } from './service/server.service';
+
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, map, startWith } from 'rxjs/operators';
+
 import { AppState } from './interface/app-state';
 import { CustomResponse } from './interface/custom-response';
 import { DataState } from './enum/data-state.enum';
+
 import { Status } from './enum/status.enum';
 import { NgForm } from '@angular/forms';
 import { Server } from './interface/server';
 import { NotifierModule } from 'angular-notifier';
+
  
 @Component({
   selector: 'app-root',
@@ -40,7 +44,8 @@ export class AppComponent implements OnInit {
   filterStatus$ = this.filterSubject.asObservable();
   private isLoading = new BehaviorSubject<boolean>(false);
   isLoading$ = this.isLoading.asObservable();
- 
+
+
   constructor(private serverService: ServerService) {}
  
   ngOnInit(): void {
@@ -66,8 +71,9 @@ export class AppComponent implements OnInit {
           } as AppState<CustomResponse>)
         )
       );
+
   }
- 
+
   pingServer(ipAddress: string): void {
     this.filterSubject.next(ipAddress);
     this.appState$ = this.serverService.ping$(ipAddress).pipe(
@@ -77,9 +83,9 @@ export class AppComponent implements OnInit {
         );
         const updatedServers = [...this.dataSubject.value.appData.data.servers];
         updatedServers[serverIndex] = response.data.server;
- 
+
         this.filterSubject.next('');
- 
+
         return {
           dataState: DataState.LOADED_STATE,
           appData: {
@@ -97,7 +103,7 @@ export class AppComponent implements OnInit {
         appData: this.dataSubject.value.appData,
         error: null
       } as AppState<CustomResponse>),
-      catchError((error: string) =>
+      catchError((error: string) => 
         of({
           dataState: DataState.ERROR_STATE,
           appData: null,
@@ -106,6 +112,81 @@ export class AppComponent implements OnInit {
       )
     );
   }
+
+  saveServer(serverForm: NgForm): void {
+    this.isLoading.next(true);
+    this.appState$ = this.serverService.save$(serverForm.value as Server)
+      .pipe(
+        map(response => {
+          const updatedServers = [response.data.server, ...this.dataSubject.value.appData.data.servers];
+          this.dataSubject.next({
+            ...this.dataSubject.value,
+            appData: {
+              ...this.dataSubject.value.appData,
+              data: {
+                ...this.dataSubject.value.appData.data,
+                servers: updatedServers
+              }
+            }
+          });
+          document.getElementById('closeModal').click();
+          this.isLoading.next(false);
+          serverForm.resetForm({ status: this.Status.SERVER_DOWN });
+
+          return {
+            dataState: DataState.LOADED_STATE,
+            appData: this.dataSubject.value.appData,
+            error: null
+          } as AppState<CustomResponse>;
+        }),
+        startWith({
+          dataState: DataState.LOADING_STATE,
+          appData: this.dataSubject.value.appData,
+          error: null
+        } as AppState<CustomResponse>),
+        catchError((error: string) => {
+          this.isLoading.next(false);
+          return of({
+            dataState: DataState.ERROR_STATE,
+            appData: null,
+            error: error
+          } as AppState<CustomResponse>);
+        })
+      );
+  }
+
+  filterServers(status: Status): void {
+    this.appState$ = this.serverService.filter$(status, this.dataSubject.value)
+    .pipe(
+      map(response => {
+
+        return {
+          dataState: DataState.LOADED_STATE,
+          appData: {
+            ...this.dataSubject.value.appData,
+            data: {
+              ...this.dataSubject.value.appData.data,
+            }
+          },
+          error: null
+        } as AppState<CustomResponse>;
+      }),
+      startWith({
+        dataState: DataState.LOADING_STATE,
+        appData: this.dataSubject.value.appData,
+        error: null
+      } as AppState<CustomResponse>),
+      catchError((error: string) => 
+        of({
+          dataState: DataState.ERROR_STATE,
+          appData: null,
+          error: error
+        } as AppState<CustomResponse>)
+      )
+    );
+  }
+ 
+ 
  
   deleteServer(server: Server): void {
     this.appState$ = this.serverService.delete$(server.id)
@@ -140,77 +221,8 @@ export class AppComponent implements OnInit {
       );
   }
  
-  saveServer(serverForm: NgForm): void {
-    this.isLoading.next(true);
-    this.appState$ = this.serverService.save$(serverForm.value as Server)
-      .pipe(
-        map(response => {
-          const updatedServers = [response.data.server, ...this.dataSubject.value.appData.data.servers];
-          this.dataSubject.next({
-            ...this.dataSubject.value,
-            appData: {
-              ...this.dataSubject.value.appData,
-              data: {
-                ...this.dataSubject.value.appData.data,
-                servers: updatedServers
-              }
-            }
-          });
-          document.getElementById('closeModal').click();
-          this.isLoading.next(false);
-          serverForm.resetForm({ status: this.Status.SERVER_DOWN });
+  
  
-          return {
-            dataState: DataState.LOADED_STATE,
-            appData: this.dataSubject.value.appData,
-            error: null
-          } as AppState<CustomResponse>;
-        }),
-        startWith({
-          dataState: DataState.LOADING_STATE,
-          appData: this.dataSubject.value.appData,
-          error: null
-        } as AppState<CustomResponse>),
-        catchError((error: string) => {
-          this.isLoading.next(false);
-          return of({
-            dataState: DataState.ERROR_STATE,
-            appData: null,
-            error: error
-          } as AppState<CustomResponse>);
-        })
-      );
-  }
- 
-  filterServers(status: Status): void {
-    this.appState$ = this.serverService.filter$(status, this.dataSubject.value)
-      .pipe(
-        map(response => {
-          return {
-            dataState: DataState.LOADED_STATE,
-            appData: {
-              ...this.dataSubject.value.appData,
-              data: {
-                ...this.dataSubject.value.appData.data,
-              }
-            },
-            error: null
-          } as AppState<CustomResponse>;
-        }),
-        startWith({
-          dataState: DataState.LOADING_STATE,
-          appData: this.dataSubject.value.appData,
-          error: null
-        } as AppState<CustomResponse>),
-        catchError((error: string) =>
-          of({
-            dataState: DataState.ERROR_STATE,
-            appData: null,
-            error: error
-          } as AppState<CustomResponse>)
-        )
-      );
-  }
  
   printReport(): void {
     let dataType = 'application/vnd.ms-excel.sheet.macroEnabled.12';
