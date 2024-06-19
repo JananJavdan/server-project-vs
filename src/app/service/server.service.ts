@@ -1,9 +1,9 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core'
 import { Observable, Subscriber, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { CustomResponse } from '../interface/custom-response';
-import { Server } from 'http';
+import { Server } from '../interface/server';
 import { Status } from '../enum/status.enum';
 
 
